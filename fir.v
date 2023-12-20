@@ -1,14 +1,16 @@
 module fir (
   input signed [7:0] data_in,
-  output signed [15:0] data_out,
+  output signed [17:0] data_out,
   input clk
 );
 
-  reg signed [15:0] res = 0;
-  reg [2:0] counter = 0;
-  reg [1:0] data_valid = 0;
-  reg signed [7:0] koef[0:2];
-  reg [4:0] takts = 0;
+  reg signed [17:0] res = 0;    //регистр для выхода
+  reg signed [17:0] temp = 0;   //регистр для счета
+  reg [2:0] counter = 0;        //счетчик для массива
+  reg [1:0] data_valid = 0;     //флаг, что прошло 10 тактов и пришли данные на вход
+  reg signed [7:0] koef[0:2];   //3 коэффициента
+  reg signed [7:0] data[0:2];   //последние 3 значения входа
+  reg [4:0] takts = 0;          //3 такта на умножение + 1 такт на перенос значения на выход
 
   assign data_out = res;
 
@@ -16,6 +18,9 @@ module fir (
     koef[0] = -1;
     koef[1] = 2;
     koef[2] = 3;
+    data[0] = 0;
+    data[1] = 0;
+    data[2] = 0;
   end
 
   always @(posedge clk) begin
@@ -25,14 +30,20 @@ module fir (
     end
     if (takts == 0) begin
       data_valid <= 1;
+      data[2] <= data[1];
+      data[1] <= data[0];
+      data[0] <= data_in;
+      temp <= 0;
     end
     if (data_valid) begin
-      res <= res + data_in * koef[counter];
-      $display("data_in = %d, data_out = %d", data_in, data_out);
-      counter <= counter + 1;
-      data_valid <= 0;
-      if (counter == 2) begin
+      if (counter < 3) begin
+        temp <= temp + data[counter] * koef[counter];    //когда counter = 3, получим валидный выход
+        counter <= counter + 1;
+      end
+      if (counter == 3) begin
+        res <= temp;
         counter <= 0;
+        data_valid <= 0;
       end
     end
   end
@@ -41,7 +52,7 @@ endmodule
 
 module fir_tb;
   reg signed [7:0] data_in;
-  wire signed [15:0] data_out;
+  wire signed [17:0] data_out;
   reg clk;
 
   fir dut (
