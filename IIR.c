@@ -9,7 +9,7 @@ void iir(int* x, int* y, int size)
 {
     for (int i = 0; i < SIZE; i++)
     {
-        y[i] = kx*x[i] - ky*(i>1?y[i-1]:0);
+        y[i] = kx*x[i] + ky*(i>1?y[i-1]:0);
     }
 }
 
