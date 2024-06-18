@@ -17,7 +17,7 @@ module priority_cd(in, out);
 endmodule
 
 module priority_cd_tb();
-    parameter IN_WIDTH = 8;
+    parameter IN_WIDTH = 64;
     localparam OUT_WIDTH = $clog2(IN_WIDTH);
     reg [IN_WIDTH-1:0] in;
     wire [OUT_WIDTH-1:0] out;
@@ -29,10 +29,11 @@ module priority_cd_tb();
     initial begin
         $dumpfile("prior.vcd");
         $dumpvars(0, priority_cd_tb);
-        #800 
-        $finish;
         in = 0;
-        always #10 in = in + 1;
+        for (in = 0; in <= 100; in = in + 1) begin
+            #1;
+        end
+        $finish;
     end
 
 endmodule
