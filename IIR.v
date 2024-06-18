@@ -4,47 +4,38 @@ module iir (
   input clk
 );
 
+
+  parameter signed [7:0] a = -1;
+  parameter signed [7:0] b = 4;
+	wire signed [15:0] ab = a * b;
+	wire signed [23:0] a2b = a * a * b;
+	wire signed [23:0] a3 = a * a * a;
+
+  reg signed [15:0] x0 = 0, x1 = 0, x2 = 0;
+  reg signed [15:0] y0 = 0, y1 = 0, y2 = 0, y3 = 0;
+
+  reg signed [15:0] temp_x0 = 0, temp_x1 = 0, temp_x2 = 0;
+  reg signed [15:0] temp_y0 = 0, temp_y1 = 0, temp_y2 = 0;
   reg signed [15:0] res = 0;
-  reg signed [15:0] x0 = 0;
-  reg signed [15:0] x1 = 0;
-  reg signed [15:0] x2 = 0;
-  reg signed [15:0] y0 = 0;
-  reg signed [15:0] y1 = 0;
-  reg signed [15:0] y2 = 0;
-
-  reg signed [15:0] temp_x0 = 0;
-  reg signed [15:0] temp_x1 = 0;
-  reg signed [15:0] temp_x2 = 0;
-  reg signed [15:0] temp_y0 = 0;
-  reg signed [15:0] temp_y1 = 0;
-  reg signed [15:0] temp_y2 = 0;
-
-  reg signed [7:0] b = 4;
-  reg signed [7:0] a = -1;
-
-  assign data_out = res;
+  assign data_out = y0;
 
   always @(posedge clk) begin
-    // Обновление задержанных значений
     temp_x0 <= data_in;
     temp_x1 <= temp_x0;
     temp_x2 <= temp_x1;
+    
     temp_y0 <= y0;
     temp_y1 <= y1;
     temp_y2 <= y2;
 
-    // Вычисление y(n) с учетом задержек
-    y0 <= a * a * a * temp_y2;
-    y1 <= a * a * b * temp_x2 + temp_y0;
-    y2 <= a * b * temp_x1 + temp_y1;
+    // Compute y(n)
+    y0 <= x0 + x1 + x2 + y3;
 
-    // Вычисление x(n) с учетом задержек
-    x0 <= b * temp_x0;
-    x1 <= b * temp_x1;
-    x2 <= b * temp_x2;
-
-    // Обновление итогового значения
-    res <= x0 + x1 + x2 + y0;
+    // Update x(n) delays
+    x0 <= b * data_in;
+    x1 <= ab * temp_x0;
+    x2 <= a2b * temp_x1;
+    y3 <= a3 * temp_y0;
   end
 
 endmodule
