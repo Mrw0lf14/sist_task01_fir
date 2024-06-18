@@ -35,7 +35,7 @@ module iir (
     x0 <= b * data_in;
     x1 <= ab * temp_x0;
     x2 <= a2b * temp_x1;
-    y3 <= a3 * temp_y0;
+    y3 <= a * temp_y0;
   end
 
 endmodule
